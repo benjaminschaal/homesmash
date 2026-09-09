@@ -20,7 +20,7 @@ const PAR_PERSONNE = { limit: 6, windowSeconds: 3600 }
 export default withAuth(async (req, res) => {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST'])
 
-  const body = readJsonBody(req)
+  const body = await readJsonBody(req)
   const type = body.type === 'reservations' ? 'reservations' : 'sondage'
   const test = body.test === true
   const admin = req.session.r === ROLES.ADMIN
