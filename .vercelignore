@@ -1,0 +1,8 @@
+# Le CLI Python n'a rien a faire dans le paquet deploye : il tourne sur ta
+# machine, pas sur Vercel. L'exclure evite aussi que Vercel detecte
+# requirements.txt et tente une construction Python parasite.
+homesmash/
+requirements.txt
+.streamlit/
+.devcontainer/
+docs/
