@@ -3,12 +3,24 @@ Module API - Appels à l'API Doinsport
 """
 
 import requests
-import urllib3
 from datetime import datetime, timedelta
-from .config import LOGIN, PASSWORD, CLUB_ID, ACTIVITY_ID, HEADERS, HEURES_CIBLES
+from .config import (
+    LOGIN,
+    PASSWORD,
+    CLUB_ID,
+    ACTIVITY_ID,
+    WHITE_LABEL_ID,
+    HEADERS,
+    HEURES_CIBLES,
+)
 
-# Désactivation des alertes pour les connexions HTTPS non vérifiées
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+# Le certificat du serveur est verifie (comportement par defaut de requests).
+# L'ancienne version passait verify=False sur chaque appel : le mot de passe du
+# compte partait alors dans un tunnel que n'importe quel reseau hostile pouvait
+# ouvrir, sans le moindre avertissement.
+
+# Delai maximal par appel : sans lui, une API muette bloque le CLI indefiniment.
+TIMEOUT = 15
 
 
 def authenticate():
@@ -24,12 +36,12 @@ def authenticate():
         "username": f"+33{LOGIN[1:]}" if LOGIN.startswith('0') else LOGIN,
         "password": PASSWORD,
         "club": f"/clubs/{CLUB_ID}",
-        "clubWhiteLabel": "/clubs/white-labels/802abea3-acbe-4f4f-aec7-3e36ee18a0e5",
+        "clubWhiteLabel": f"/clubs/white-labels/{WHITE_LABEL_ID}",
         "origin": "white_label_app"
     }
     
     try:
-        response = requests.post(url, json=payload, headers=HEADERS, verify=False)
+        response = requests.post(url, json=payload, headers=HEADERS, timeout=TIMEOUT)
         response.raise_for_status()
         
         token = response.json().get('token')
@@ -44,17 +56,24 @@ def authenticate():
         return None
 
 
-def get_dates_for_week(week_number, year=2026):
+def get_dates_for_week(week_number, year=None):
     """
     Calcule les dates du Lundi au Jeudi pour un numéro de semaine donné.
-    
+
+    L'année était figée à 2026 : le CLI renvoyait donc les dates de 2026 quoi
+    qu'il arrive. Par défaut on prend l'année en cours, et une semaine déjà
+    passée est comprise comme celle de l'année suivante.
+
     Args:
         week_number: Numéro de semaine ISO
-        year: Année (défaut 2026)
-    
+        year: Année (défaut : l'année en cours)
+
     Returns:
         list: Liste de dates au format 'AAAA-MM-JJ'
     """
+    if year is None:
+        aujourdhui = datetime.now().isocalendar()
+        year = aujourdhui.year + (1 if week_number < aujourdhui.week else 0)
     monday = datetime.fromisocalendar(year, week_number, 1)
     return [(monday + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(4)]
 
@@ -93,7 +112,7 @@ def get_disponibilites(semaine_depart, nb_semaines=1, token=None):
             }
             
             try:
-                response = requests.get(url, params=params, headers=current_headers, verify=False)
+                response = requests.get(url, params=params, headers=current_headers, timeout=TIMEOUT)
                 response.raise_for_status()
                 data = response.json()
                 
@@ -139,7 +158,7 @@ def get_user_id(token):
     headers["Authorization"] = f"Bearer {token}"
     
     try:
-        response = requests.get(url, headers=headers, verify=False)
+        response = requests.get(url, headers=headers, timeout=TIMEOUT)
         response.raise_for_status()
         return response.json().get('id')
     except Exception as e:
@@ -174,7 +193,7 @@ def get_credits(token=None):
     
     try:
         # Requesting without specific params often returns all tokens for the auth user
-        response = requests.get(url, params=params, headers=headers, verify=False)
+        response = requests.get(url, params=params, headers=headers, timeout=TIMEOUT)
         response.raise_for_status()
         data = response.json()
         
@@ -301,14 +320,14 @@ def get_reservations(token=None, weeks_history=1):
     
     for key, url, params in configs:
         try:
-            response = requests.get(url, params=params, headers=headers, verify=False)
+            response = requests.get(url, params=params, headers=headers, timeout=TIMEOUT)
             response.raise_for_status()
             items = response.json().get('hydra:member', [])
             
             # Si a_venir est vide avec /listing, tenter avec /bookings
             if key == 'a_venir' and not items:
                 url_alt = "https://api-v3.doinsport.club/clubs/bookings"
-                response = requests.get(url_alt, params=params, headers=headers, verify=False)
+                response = requests.get(url_alt, params=params, headers=headers, timeout=TIMEOUT)
                 items = response.json().get('hydra:member', [])
 
             for item in items:

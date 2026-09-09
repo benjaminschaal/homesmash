@@ -1,3 +1,7 @@
+# CLI HomeSmash (python -m homesmash) : rien d'autre n'est necessaire.
+requests
+
+# Interface Streamlit historique, facultative. Voir homesmash/app.py :
+# la version web deployee sur Vercel la remplace.
 streamlit
 pandas
-requests

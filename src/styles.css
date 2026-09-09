@@ -1,0 +1,638 @@
+/* HomeSmash — un seul theme, sombre, assume.
+   L'application se consulte a midi, souvent d'une main, dans un couloir :
+   grandes cibles tactiles, contrastes francs, aucune fioriture animee. */
+
+:root {
+  --fond: #0b1014;
+  --surface: #141b21;
+  --surface-haute: #1b242c;
+  --bord: rgba(255, 255, 255, 0.08);
+  --bord-net: rgba(255, 255, 255, 0.16);
+
+  --texte: #e8eff4;
+  --texte-doux: #93a4b1;
+  --texte-faible: #64757f;
+
+  --vif: #c8f04a;
+  --vif-sombre: #9ed217;
+  --encre: #0b1014;
+  --liege: #e8a33d;
+  --alerte: #ff7a6b;
+
+  --r-s: 10px;
+  --r-m: 14px;
+  --r-l: 20px;
+
+  --marge: clamp(16px, 4vw, 24px);
+  --haut: env(safe-area-inset-top, 0px);
+  --bas: env(safe-area-inset-bottom, 0px);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--fond);
+  color: var(--texte);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+/* Le halo derriere l'entete : la seule touche decorative de l'interface. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -40% 0 auto 0;
+  height: 60vh;
+  background: radial-gradient(60% 50% at 50% 60%, rgba(200, 240, 74, 0.1), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  background: none;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: calc(var(--haut) + 12px) var(--marge) calc(var(--bas) + 104px);
+}
+
+/* --- Entete ---------------------------------------------------------------- */
+
+.entete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0 20px;
+}
+
+.entete img {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+}
+
+.entete-titre {
+  flex: 1;
+  min-width: 0;
+}
+
+.entete-titre h1 {
+  font-size: 20px;
+  font-weight: 650;
+}
+
+.entete-titre p {
+  margin: 1px 0 0;
+  font-size: 12.5px;
+  color: var(--texte-faible);
+}
+
+.jeton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border: 1px solid var(--bord);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 12.5px;
+  color: var(--texte-doux);
+  white-space: nowrap;
+}
+
+.jeton b {
+  color: var(--texte);
+  font-weight: 600;
+}
+
+/* --- Blocs ------------------------------------------------------------------ */
+
+.carte {
+  border: 1px solid var(--bord);
+  border-radius: var(--r-l);
+  background: linear-gradient(180deg, var(--surface-haute), var(--surface));
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+.carte-titre {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.carte-titre h2 {
+  font-size: 16px;
+  font-weight: 640;
+}
+
+.carte-titre span {
+  font-size: 12.5px;
+  color: var(--texte-faible);
+}
+
+.section-titre {
+  margin: 22px 0 10px;
+  font-size: 12px;
+  font-weight: 640;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--texte-faible);
+}
+
+/* --- Boutons ---------------------------------------------------------------- */
+
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: var(--r-m);
+  border: 1px solid var(--bord-net);
+  background: var(--surface-haute);
+  color: var(--texte);
+  font-size: 15px;
+  font-weight: 560;
+  text-decoration: none;
+  transition: filter 0.12s ease, opacity 0.12s ease;
+}
+
+.bouton:active {
+  filter: brightness(1.25);
+}
+
+.bouton.large {
+  width: 100%;
+}
+
+.bouton.primaire {
+  background: var(--vif);
+  border-color: var(--vif);
+  color: var(--encre);
+  font-weight: 650;
+}
+
+.bouton:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Un bouton vif passe en gris plutot qu'en vert delave : a 45 % d'opacite le
+   texte sombre sur fond citron devient illisible. */
+.bouton.primaire:disabled {
+  opacity: 1;
+  background: var(--surface-haute);
+  border-color: var(--bord-net);
+  color: var(--texte-faible);
+}
+
+/* --- Segments (1 / 2 / 3 / 4 semaines) --------------------------------------- */
+
+.segments {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--bord);
+  border-radius: var(--r-m);
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.segments button {
+  flex: 1;
+  min-height: 38px;
+  border-radius: var(--r-s);
+  font-size: 14px;
+  font-weight: 560;
+  color: var(--texte-doux);
+}
+
+.segments button[aria-pressed='true'] {
+  background: var(--vif);
+  color: var(--encre);
+  font-weight: 650;
+}
+
+/* --- Jours et creneaux ------------------------------------------------------- */
+
+.jour {
+  border: 1px solid var(--bord);
+  border-radius: var(--r-m);
+  background: var(--surface);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.jour.vide {
+  opacity: 0.5;
+}
+
+.jour-entete {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.jour-entete strong {
+  font-size: 15px;
+  font-weight: 620;
+}
+
+.jour-entete strong::first-letter,
+.resa-corps strong::first-letter {
+  text-transform: uppercase;
+}
+
+.jour-entete span {
+  font-size: 12.5px;
+  color: var(--texte-faible);
+}
+
+.jour.vide .jour-entete {
+  margin-bottom: 0;
+}
+
+.creneaux {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+}
+
+.creneau {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--bord-net);
+  border-radius: var(--r-s);
+  background: rgba(200, 240, 74, 0.07);
+  text-decoration: none;
+  color: inherit;
+}
+
+.creneau b {
+  font-size: 16px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--vif);
+}
+
+.creneau span {
+  font-size: 11.5px;
+  color: var(--texte-doux);
+}
+
+/* --- Reservations ------------------------------------------------------------ */
+
+.resa {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--bord);
+}
+
+.resa:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.resa-heure {
+  min-width: 58px;
+  font-size: 17px;
+  font-weight: 660;
+  font-variant-numeric: tabular-nums;
+  color: var(--vif);
+}
+
+.resa.annulee .resa-heure {
+  color: var(--texte-faible);
+  text-decoration: line-through;
+}
+
+.resa-corps {
+  flex: 1;
+  min-width: 0;
+}
+
+.resa-corps strong {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 580;
+}
+
+.resa-corps span {
+  font-size: 12.5px;
+  color: var(--texte-faible);
+}
+
+/* --- Credits ----------------------------------------------------------------- */
+
+.credit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--bord);
+}
+
+.credit:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.credit-nom {
+  font-size: 14.5px;
+}
+
+.credit-nom span {
+  display: block;
+  font-size: 12px;
+  color: var(--texte-faible);
+}
+
+.credit-solde {
+  font-size: 20px;
+  font-weight: 680;
+  font-variant-numeric: tabular-nums;
+  color: var(--liege);
+}
+
+/* --- Onglets ----------------------------------------------------------------- */
+
+.onglets {
+  display: flex;
+  gap: 18px;
+  border-bottom: 1px solid var(--bord);
+  margin-bottom: 14px;
+}
+
+.onglets button {
+  padding: 0 0 10px;
+  font-size: 14px;
+  font-weight: 560;
+  color: var(--texte-faible);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.onglets button[aria-selected='true'] {
+  color: var(--texte);
+  border-bottom-color: var(--vif);
+}
+
+/* --- Barre de navigation basse ------------------------------------------------ */
+
+.navbasse {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  padding: 8px var(--marge) calc(var(--bas) + 8px);
+  gap: 6px;
+  background: rgba(11, 16, 20, 0.86);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--bord);
+}
+
+.navbasse-int {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.navbasse button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 0 5px;
+  border-radius: var(--r-s);
+  font-size: 11px;
+  font-weight: 560;
+  color: var(--texte-faible);
+}
+
+.navbasse button[aria-current='page'] {
+  color: var(--vif);
+  background: rgba(200, 240, 74, 0.09);
+}
+
+.navbasse svg {
+  width: 21px;
+  height: 21px;
+}
+
+/* --- Etats -------------------------------------------------------------------- */
+
+.message {
+  padding: 13px 14px;
+  border-radius: var(--r-m);
+  border: 1px solid var(--bord);
+  background: var(--surface);
+  font-size: 13.5px;
+  color: var(--texte-doux);
+}
+
+.message.succes {
+  border-color: rgba(200, 240, 74, 0.4);
+  background: rgba(200, 240, 74, 0.09);
+  color: var(--vif);
+}
+
+.message.erreur {
+  border-color: rgba(255, 122, 107, 0.4);
+  background: rgba(255, 122, 107, 0.09);
+  color: var(--alerte);
+}
+
+.vide {
+  padding: 26px 14px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--texte-faible);
+}
+
+.squelette {
+  height: 74px;
+  border-radius: var(--r-m);
+  margin-bottom: 10px;
+  background: linear-gradient(100deg, var(--surface) 30%, var(--surface-haute) 50%, var(--surface) 70%);
+  background-size: 260% 100%;
+  animation: glisse 1.3s linear infinite;
+}
+
+@keyframes glisse {
+  to {
+    background-position: -160% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .squelette {
+    animation: none;
+  }
+}
+
+/* --- Ecran de deverrouillage --------------------------------------------------- */
+
+.verrou {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: calc(var(--haut) + 32px) var(--marge) calc(var(--bas) + 32px);
+  text-align: center;
+}
+
+.verrou img {
+  width: 84px;
+  height: 84px;
+  border-radius: 23px;
+  margin: 0 auto;
+}
+
+.verrou h1 {
+  font-size: 27px;
+  font-weight: 680;
+}
+
+.verrou p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--texte-doux);
+}
+
+.champ {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border-radius: var(--r-m);
+  border: 1px solid var(--bord-net);
+  background: var(--surface);
+  font-size: 16px;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+.champ:focus {
+  outline: 2px solid var(--vif);
+  outline-offset: 1px;
+}
+
+.verrou form {
+  display: grid;
+  gap: 10px;
+}
+
+.pied {
+  font-size: 12px;
+  color: var(--texte-faible);
+}
+
+/* --- Bascule mode test ---------------------------------------------------------- */
+
+.bascule {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0 0;
+  font-size: 13.5px;
+  color: var(--texte-doux);
+}
+
+.bascule input {
+  width: 46px;
+  height: 27px;
+  appearance: none;
+  border-radius: 999px;
+  background: var(--surface-haute);
+  border: 1px solid var(--bord-net);
+  position: relative;
+  flex: none;
+  cursor: pointer;
+}
+
+.bascule input::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: var(--texte-doux);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.bascule input:checked {
+  background: rgba(232, 163, 61, 0.3);
+  border-color: var(--liege);
+}
+
+.bascule input:checked::after {
+  transform: translateX(19px);
+  background: var(--liege);
+}
+
+.liste-puces {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13.5px;
+  color: var(--texte-doux);
+}
+
+.liste-puces li {
+  margin-bottom: 6px;
+}

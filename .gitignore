@@ -1,7 +1,20 @@
-# Ignorer le fichier contenant les vrais mots de passe
+# Secrets : rien de tout cela ne doit partir sur GitHub
+.env
+.env.*
+!.env.example
 .streamlit/secrets.toml
+
+# Node
+node_modules/
+dist/
+dev-dist/
+
+# Vercel
+.vercel
 
 # Environnements et caches Python
 .venv/
 __pycache__/
 *.pyc
+
+.DS_Store

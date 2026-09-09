@@ -1,3 +1,15 @@
+"""
+Ancienne interface Streamlit, conservee pour ne rien perdre.
+
+Elle est remplacee par la version web deployee sur Vercel, qui protege le
+compte Doinsport bien mieux : un code d'acces par personne au lieu d'un mot de
+passe unique partage, une limitation des tentatives, et des identifiants qui ne
+transitent jamais par un service tiers. Tant que cette version-ci reste
+deployee sur Streamlit Cloud, le meme compte a deux portes d'entree dont la
+plus faible fixe le niveau de securite reel : voir le README pour la marche a
+suivre.
+"""
+
 import streamlit as st
 import datetime
 import pandas as pd
@@ -19,6 +31,16 @@ from homesmash.config import (
 
 st.set_page_config(page_title="HomeSmash - Badsclub", page_icon="🏸", layout="wide")
 
+# Le mot de passe vient de l'environnement en priorite, comme le reste de la
+# configuration ; st.secrets ne sert plus que de repli.
+APP_PASSWORD = os.environ.get("APP_PASSWORD") or st.secrets.get("APP_PASSWORD", "")
+
+st.warning(
+    "⚠️ Version historique. La version web (Vercel) la remplace : "
+    "un code d'accès par personne, tentatives limitées, compte Doinsport "
+    "jamais exposé. Pense à retirer ce déploiement Streamlit Cloud."
+)
+
 # --- AUTHENTIFICATION ---
 if "password_correct" not in st.session_state:
     st.session_state["password_correct"] = False
@@ -27,7 +49,7 @@ if not st.session_state["password_correct"]:
     st.title("🔒 Accès sécurisé")
     pwd = st.text_input("Veuillez saisir le mot de passe :", type="password")
     if st.button("Valider"):
-        if pwd == st.secrets["APP_PASSWORD"]:
+        if APP_PASSWORD and pwd == APP_PASSWORD:
             st.session_state["password_correct"] = True
             st.rerun()
         else:

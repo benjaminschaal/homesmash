@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="HomeSmash">
+  <defs>
+    <linearGradient id="hs-plume" x1="256" y1="70" x2="256" y2="340" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset=".55" stop-color="#EAF1F5"/>
+      <stop offset="1" stop-color="#AFC0CB"/>
+    </linearGradient>
+    <linearGradient id="hs-liege" x1="196" y1="330" x2="316" y2="462" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E8FB86"/>
+      <stop offset="1" stop-color="#9ED217"/>
+    </linearGradient>
+    <radialGradient id="hs-halo" cx="256" cy="392" r="230" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C8F04A" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#C8F04A" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Une seule plume, dupliquee en eventail autour d'un pivot place sous le
+         bouchon : c'est ce qui donne l'ouverture reguliere d'un vrai volant. -->
+    <path id="hs-plume-forme" d="M238 340 L214 116 Q256 82 298 116 L274 340 Z"/>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="#0B1014"/>
+  <rect width="512" height="512" rx="112" fill="url(#hs-halo)"/>
+
+  <g transform="rotate(-14 256 262)">
+    <g fill="url(#hs-plume)">
+      <use href="#hs-plume-forme" transform="rotate(-34 256 470)" opacity=".55"/>
+      <use href="#hs-plume-forme" transform="rotate(34 256 470)" opacity=".55"/>
+      <use href="#hs-plume-forme" transform="rotate(-20 256 470)" opacity=".78"/>
+      <use href="#hs-plume-forme" transform="rotate(20 256 470)" opacity=".78"/>
+      <use href="#hs-plume-forme" transform="rotate(-6.5 256 470)"/>
+      <use href="#hs-plume-forme" transform="rotate(6.5 256 470)"/>
+    </g>
+
+    <!-- Le fil qui ceinture les plumes, en creux plutot qu'en relief -->
+    <path d="M160 288 q96 34 192 0" fill="none" stroke="#0B1014" stroke-opacity=".45"
+          stroke-width="14" stroke-linecap="round"/>
+
+    <!-- Le bouchon de liege -->
+    <path d="M194 330 h124 v58 a62 62 0 0 1 -124 0 z" fill="url(#hs-liege)"/>
+    <path d="M194 330 h124 v16 h-124 z" fill="#0B1014" fill-opacity=".14"/>
+  </g>
+</svg>
