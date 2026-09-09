@@ -26,7 +26,7 @@ export default async function handler(req, res) {
     return send(res, 429, { error: 'too_many_attempts', retryAfter })
   }
 
-  const identity = match(readJsonBody(req).code)
+  const identity = match((await readJsonBody(req)).code)
   if (!identity) {
     // Une reponse instantanee permet de tester des milliers de codes ; un
     // demi-quart de seconde impose rend l'exercice inutilisable, sans que la

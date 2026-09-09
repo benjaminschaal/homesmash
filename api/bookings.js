@@ -1,4 +1,4 @@
-import { send, methodNotAllowed, intParam } from './_lib/http.js'
+import { send, methodNotAllowed, intParam, readQuery } from './_lib/http.js'
 import { withAuth } from './_lib/guard.js'
 import { ROLES } from './_lib/accessCodes.js'
 import { getBookings } from './_lib/doinsport.js'
@@ -7,7 +7,7 @@ import { getBookings } from './_lib/doinsport.js'
 export default withAuth(
   async (req, res) => {
     if (req.method !== 'GET') return methodNotAllowed(res, ['GET'])
-    const history = intParam(req.query?.history, { min: 0, max: 52, fallback: 1 })
+    const history = intParam(readQuery(req).history, { min: 0, max: 52, fallback: 1 })
     return send(res, 200, { history, ...(await getBookings(history)) })
   },
   { role: ROLES.ADMIN }
