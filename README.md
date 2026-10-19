@@ -100,10 +100,12 @@ gardien. Personne ne le voit, personne ne repart avec.
    `401` sans cookie signifie que la porte est bien fermée. `503` veut dire
    qu'une variable manque : l'écran d'accueil précise laquelle.
 
-5. *(facultatif)* **Ajouter Upstash Redis** — *Storage › Upstash for Redis*.
-   La limitation de débit devient alors commune à toutes les instances au lieu
-   d'être locale à chacune. Rien à configurer, les variables sont posées toutes
-   seules ; il faut simplement **redéployer** après.
+5. *(recommandé)* **Ajouter Upstash Redis** — *Storage › Upstash for Redis*.
+   Il garde les **créneaux suivis** choisis depuis l'écran Compte (sans lui,
+   l'app reste sur le paramétrage par défaut et refuse d'en enregistrer un
+   autre), et rend la limitation de débit commune à toutes les instances au
+   lieu d'être locale à chacune. Rien à configurer, les variables sont posées
+   toutes seules ; il faut simplement **redéployer** après.
 
 ### Partager avec les collègues
 
@@ -128,11 +130,28 @@ flowchart TD
     A --> D3["Ses réservations"]
     A --> D4["Ses crédits"]
     A --> D5["Salon de test"]
+    A --> D6["Créneaux suivis"]
 ```
 
 Un collègue voit les terrains libres et peut lancer un sondage : c'est tout
 l'intérêt de l'app. Il ne voit ni tes réservations, ni le solde de tes packs —
-côté serveur, `/api/bookings` et `/api/credits` lui répondent `403`.
+côté serveur, `/api/bookings`, `/api/credits` et `/api/settings` lui répondent
+`403`.
+
+### Choisir les créneaux suivis
+
+Par défaut, l'app regarde **du lundi au jeudi, les créneaux qui commencent
+entre 12h00 et 13h15**. Un admin peut changer cela dans *Compte › Créneaux
+suivis* (ou via le lien *Régler* de l'écran des dispos) :
+
+- **les jours** : n'importe quelle combinaison du lundi au dimanche ;
+- **les moments** : jusqu'à 4 plages horaires (heure de début du créneau, au
+  quart d'heure), avec des raccourcis *Matin*, *Midi*, *Après-midi*, *Soir* ;
+- **Par défaut** revient au réglage d'origine, **Annuler** abandonne les
+  modifications en cours.
+
+Le réglage vaut pour tout le monde : l'écran des dispos des collègues comme le
+sondage publié sur Google Chat. Il est conservé dans Upstash Redis (étape 5).
 
 ---
 
@@ -204,6 +223,8 @@ homesmash/
 │   │   ├── guard.js        withAuth() : la garde commune aux routes
 │   │   ├── http.js         Réponses no-store, lecture de corps, bornes
 │   │   ├── rateLimit.js    Limitation de débit (Redis, sinon mémoire)
+│   │   ├── redis.js        Accès à Upstash Redis (API REST)
+│   │   ├── reglages.js     Créneaux suivis : défaut, validation, stockage
 │   │   └── session.js      Cookie signé HMAC
 │   ├── announce.js         POST  publier sur Google Chat
 │   ├── availability.js     GET   créneaux libres
@@ -211,7 +232,8 @@ homesmash/
 │   ├── credits.js          GET   crédits               (admin)
 │   ├── login.js            POST  ouvrir une session
 │   ├── logout.js           POST  fermer la session
-│   └── session.js          GET   qui suis-je
+│   ├── session.js          GET   qui suis-je
+│   └── settings.js         GET/PUT/DELETE  créneaux suivis  (admin)
 ├── src/                    Interface React (Vite)
 ├── public/                 Icônes PWA (volant)
 ├── homesmash/              CLI Python

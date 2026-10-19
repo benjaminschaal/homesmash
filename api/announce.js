@@ -12,6 +12,7 @@ import { ROLES } from './_lib/accessCodes.js'
 import { hit } from './_lib/rateLimit.js'
 import { getAvailability, getBookings, getCredits, bookingUrl } from './_lib/doinsport.js'
 import { carteSondage, carteReservations, webhook, publier } from './_lib/chat.js'
+import { lireReglages } from './_lib/reglages.js'
 
 // Le salon est partage avec des collegues : mieux vaut une limite basse qu'un
 // bouton qu'on peut marteler.
@@ -49,7 +50,9 @@ export default withAuth(async (req, res) => {
   let payload
   if (type === 'sondage') {
     const weeks = intParam(body.weeks, { min: 1, max: 6, fallback: 2 })
-    payload = carteSondage(await getAvailability(weeks), credits, bookingUrl())
+    // Les memes creneaux que ceux de l'ecran des dispos : le sondage propose ce
+    // que l'equipe a choisi de regarder, pas une liste figee dans le code.
+    payload = carteSondage(await getAvailability(weeks, await lireReglages()), credits, bookingUrl())
   } else {
     payload = carteReservations((await getBookings(0)).aVenir, credits)
   }

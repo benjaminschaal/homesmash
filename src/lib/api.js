@@ -51,7 +51,11 @@ export const api = {
   dispos: (weeks) => appel(`/api/availability?weeks=${weeks}`),
   reservations: (history) => appel(`/api/bookings?history=${history}`),
   credits: () => appel('/api/credits'),
-  publier: (payload) => appel('/api/announce', { method: 'POST', body: JSON.stringify(payload) })
+  publier: (payload) => appel('/api/announce', { method: 'POST', body: JSON.stringify(payload) }),
+  reglages: () => appel('/api/settings'),
+  enregistrerReglages: (reglages) =>
+    appel('/api/settings', { method: 'PUT', body: JSON.stringify(reglages) }),
+  retablirReglages: () => appel('/api/settings', { method: 'DELETE' })
 }
 
 export { ErreurApi }
@@ -72,7 +76,11 @@ export function messageErreur(erreur) {
       return 'Session expirée. Reconnecte-toi.'
     case 'not_configured':
     case 'webhook_absent':
+    case 'invalid_settings':
+    case 'store_absent':
       return erreur.message
+    case 'store_failed':
+      return 'Le stockage ne répond pas : rien n’a été enregistré. Réessaie dans un instant.'
     case 'upstream_failed':
       return 'Doinsport ne répond pas correctement. Réessaie dans un instant.'
     default:

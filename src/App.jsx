@@ -92,7 +92,7 @@ export default function App() {
           </p>
         )}
 
-        {pageActive === 'dispos' && <Dispos admin={admin} />}
+        {pageActive === 'dispos' && <Dispos admin={admin} onReglages={() => setPage('compte')} />}
         {pageActive === 'resas' && <Reservations />}
         {pageActive === 'compte' && <Compte session={session} onDeconnexion={surExpiration} />}
       </div>
