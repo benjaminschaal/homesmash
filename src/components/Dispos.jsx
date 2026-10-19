@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api, messageErreur } from '../lib/api.js'
-import { enJourMois, estAujourdHui, compter } from '../lib/format.js'
+import { enJourMois, estAujourdHui, compter, resumeCreneaux } from '../lib/format.js'
 
 const SEMAINES = [1, 2, 3, 4]
 
-export function Dispos({ admin }) {
+export function Dispos({ admin, onReglages }) {
   const [semaines, setSemaines] = useState(2)
   const [donnees, setDonnees] = useState(null)
   const [enCours, setEnCours] = useState(true)
@@ -62,13 +62,20 @@ export function Dispos({ admin }) {
         ))}
       </div>
 
-      <p className="section-titre">
-        {enCours
-          ? 'Recherche en cours…'
-          : erreur
-            ? 'Créneaux libres'
-            : `${compter(total, 'créneau', 'créneaux')} · lundi à jeudi, 12h–13h15`}
-      </p>
+      <div className="section-entete">
+        <p className="section-titre">
+          {enCours
+            ? 'Recherche en cours…'
+            : erreur || !donnees.reglages
+              ? 'Créneaux libres'
+              : `${compter(total, 'créneau', 'créneaux')} · ${resumeCreneaux(donnees.reglages)}`}
+        </p>
+        {admin && (
+          <button className="lien" type="button" onClick={onReglages}>
+            Régler
+          </button>
+        )}
+      </div>
 
       {erreur && (
         <div className="message erreur" role="alert">

@@ -8,12 +8,10 @@
 // autrement dit, le mot de passe partait dans un tunnel que n'importe quel
 // reseau hostile pouvait ouvrir. fetch verifie par defaut, on n'y touche pas.
 
+import { JOURS_SEMAINE } from './reglages.js'
+
 const BASE = 'https://api-v3.doinsport.club'
 const TIMEOUT_MS = 12000
-
-// Creneaux du midi vises, du lundi au jeudi : c'est le rituel du club.
-export const HEURES_CIBLES = ['12:00', '12:15', '12:30', '12:45', '13:00', '13:15']
-export const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi']
 
 const HEADERS = {
   'User-Agent': 'HomeSmash/1.0 (+https://github.com/benjaminschaal/homesmash)',
@@ -143,33 +141,57 @@ function isoWeek(date) {
   return Math.ceil(((d - yearStart) / 86400000 + 1) / 7)
 }
 
-// Les jours a interroger : lundi a jeudi, sur `weeks` semaines a partir
-// d'aujourd'hui, en sautant ceux deja passes -- personne ne reserve hier.
-export function targetDays(weeks) {
+// Les jours a interroger : ceux du parametrage (1 = lundi ... 7 = dimanche),
+// sur `weeks` semaines a partir d'aujourd'hui, en sautant ceux deja passes --
+// personne ne reserve hier.
+export function targetDays(weeks, jours) {
   const today = iso(new Date())
   const monday = mondayOfWeek(new Date())
   const days = []
   for (let w = 0; w < weeks; w += 1) {
-    for (let i = 0; i < JOURS.length; i += 1) {
+    for (let i = 0; i < 7; i += 1) {
+      if (!jours.includes(i + 1)) continue
       const day = new Date(monday)
       day.setUTCDate(monday.getUTCDate() + w * 7 + i)
       const date = iso(day)
-      if (date >= today) days.push({ date, jour: JOURS[i], semaine: isoWeek(day) })
+      if (date >= today) days.push({ date, jour: JOURS_SEMAINE[i], semaine: isoWeek(day) })
     }
   }
   return days
 }
 
+// --- Heures --------------------------------------------------------------------
+
+const enMinutes = (hhmm) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5))
+const enHHMM = (minutes) =>
+  `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
+
+// La fenetre demandee a Doinsport pour couvrir toutes les plages. Les anciennes
+// bornes fixes (11:59 -> 14:01, pour des debuts de 12:00 a 13:15) laissaient une
+// minute avant le premier debut et 46 apres le dernier : la place d'une seance
+// de 45 min, la borne `to` portant sans doute sur la fin. On garde ces marges,
+// si bien que le parametrage par defaut interroge exactement comme avant.
+export function fenetre(plages) {
+  const premier = Math.min(...plages.map((p) => enMinutes(p.debut)))
+  const dernier = Math.max(...plages.map((p) => enMinutes(p.fin)))
+  return {
+    from: `${enHHMM(Math.max(0, premier - 1))}:00`,
+    to: `${enHHMM(Math.min(23 * 60 + 59, dernier + 46))}:00`
+  }
+}
+
+// Le format HH:MM se compare comme du texte : '12:45' < '13:00'.
+export const dansLesPlages = (heure, plages) => plages.some((p) => heure >= p.debut && heure <= p.fin)
+
 // --- Disponibilites -----------------------------------------------------------
 
-async function availabilityForDay(day, token) {
+async function availabilityForDay(day, token, plages) {
   const c = config()
   const data = await call(`/clubs/playgrounds/plannings/${day.date}`, {
     token,
     params: {
       'club.id': c.clubId,
-      from: '11:59:00',
-      to: '14:01:00',
+      ...fenetre(plages),
       'activities.id': c.activityId,
       bookingType: 'unique'
     }
@@ -180,10 +202,11 @@ async function availabilityForDay(day, token) {
     const terrain = playground?.name || 'Terrain'
     for (const activity of playground?.activities || []) {
       for (const slot of activity?.slots || []) {
-        const start = slot?.startAt || ''
-        if (!HEURES_CIBLES.some((h) => start.includes(h))) continue
+        // `startAt` arrive en '12:00:00' ou en '2026-10-19 12:00:00' : la
+        // premiere sequence HH:MM est l'heure dans les deux cas.
+        const heure = String(slot?.startAt || '').match(/\d{2}:\d{2}/)?.[0]
+        if (!heure || !dansLesPlages(heure, plages)) continue
         if (!(slot?.prices || []).some((p) => p?.bookable === true)) continue
-        const heure = start.includes(' ') ? start.split(' ').pop().slice(0, 5) : start.slice(0, 5)
         if (!parHeure.has(heure)) parHeure.set(heure, [])
         parHeure.get(heure).push(terrain)
       }
@@ -200,15 +223,15 @@ async function availabilityForDay(day, token) {
 
 // Les jours sont interroges par petits paquets : en serie c'est trop lent pour
 // la limite de duree d'une fonction, tous d'un coup c'est impoli pour l'API.
-export async function getAvailability(weeks) {
+export async function getAvailability(weeks, { jours, plages }) {
   const token = await authenticate()
-  const days = targetDays(weeks)
+  const days = targetDays(weeks, jours)
   const results = []
   const BATCH = 4
 
   for (let i = 0; i < days.length; i += BATCH) {
     const batch = await Promise.allSettled(
-      days.slice(i, i + BATCH).map((day) => availabilityForDay(day, token))
+      days.slice(i, i + BATCH).map((day) => availabilityForDay(day, token, plages))
     )
     batch.forEach((outcome, index) => {
       if (outcome.status === 'fulfilled') {

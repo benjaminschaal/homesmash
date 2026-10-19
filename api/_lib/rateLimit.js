@@ -10,10 +10,9 @@
 // Dans les deux cas la reponse a un code faux est deliberement lente
 // (voir api/login.js) : c'est ce qui rend l'attaque a grande echelle penible.
 
-const STORE_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || ''
-const STORE_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || ''
+import { redis, redisDisponible } from './redis.js'
 
-export const backend = STORE_URL && STORE_TOKEN ? 'redis' : 'memoire'
+export const backend = redisDisponible ? 'redis' : 'memoire'
 
 const local = new Map()
 
@@ -34,21 +33,10 @@ function localHit(key, limit, windowSeconds) {
 }
 
 async function redisHit(key, limit, windowSeconds) {
-  const call = async (command) => {
-    const response = await fetch(STORE_URL, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${STORE_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(command),
-      signal: AbortSignal.timeout(3000)
-    })
-    if (!response.ok) throw new Error(`store_${response.status}`)
-    return (await response.json()).result
-  }
-
-  const count = Number(await call(['INCR', key]))
-  if (count === 1) await call(['EXPIRE', key, windowSeconds])
+  const count = Number(await redis(['INCR', key]))
+  if (count === 1) await redis(['EXPIRE', key, windowSeconds])
   if (count <= limit) return { allowed: true, retryAfter: 0 }
-  const ttl = Number(await call(['TTL', key]))
+  const ttl = Number(await redis(['TTL', key]))
   return { allowed: false, retryAfter: ttl > 0 ? ttl : windowSeconds }
 }
 

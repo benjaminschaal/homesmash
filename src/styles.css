@@ -175,6 +175,27 @@ h3 {
   color: var(--texte-faible);
 }
 
+/* Un titre de section accompagne d'une action discrete (admin : "Regler"). */
+.section-entete {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 22px 0 10px;
+}
+
+.section-entete .section-titre {
+  margin: 0;
+}
+
+.lien {
+  flex: none;
+  padding: 6px 0 6px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vif);
+}
+
 /* --- Boutons ---------------------------------------------------------------- */
 
 .bouton {
@@ -249,6 +270,14 @@ h3 {
   font-weight: 650;
 }
 
+/* Sept jours sur la largeur d'un telephone : les etiquettes passent a trois
+   lettres et perdent leur marge interieure. */
+.segments.jours button {
+  min-width: 0;
+  padding: 0;
+  text-transform: capitalize;
+}
+
 /* --- Jours et creneaux ------------------------------------------------------- */
 
 .jour {
@@ -319,6 +348,133 @@ h3 {
 .creneau span {
   font-size: 11.5px;
   color: var(--texte-doux);
+}
+
+/* --- Creneaux suivis (admin) -------------------------------------------------- */
+
+.etiquette {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 18px 0 8px;
+  font-size: 12px;
+  font-weight: 640;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--texte-faible);
+}
+
+.carte-titre + .etiquette {
+  margin-top: 0;
+}
+
+.etiquette span {
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.plage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.plage > span {
+  font-size: 13.5px;
+  color: var(--texte-faible);
+}
+
+/* Un select natif garde la roue de l'iPhone ; on ne lui retire que son habit
+   clair, qui jure sur le fond sombre, et on redessine la fleche. */
+.choix-heure {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 30px 0 12px;
+  border: 1px solid var(--bord-net);
+  border-radius: var(--r-s);
+  background: var(--surface)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%2393a4b1' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    no-repeat right 11px center / 11px;
+  -webkit-appearance: none;
+  appearance: none;
+  color-scheme: dark;
+  font-size: 15px;
+  font-weight: 560;
+  font-variant-numeric: tabular-nums;
+}
+
+.choix-heure:focus-visible {
+  outline: 2px solid var(--vif);
+  outline-offset: 1px;
+}
+
+.retirer {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--bord);
+  border-radius: var(--r-s);
+  font-size: 20px;
+  line-height: 1;
+  color: var(--texte-doux);
+}
+
+.moments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.puce {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px dashed var(--bord-net);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 560;
+  color: var(--texte-doux);
+}
+
+.puce:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.resume {
+  margin: 18px 0 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(200, 240, 74, 0.25);
+  border-radius: var(--r-m);
+  background: rgba(200, 240, 74, 0.07);
+  font-size: 14px;
+  font-weight: 560;
+  color: var(--vif);
+}
+
+.resume::first-letter {
+  text-transform: uppercase;
+}
+
+.resume.probleme {
+  border-color: rgba(255, 122, 107, 0.4);
+  background: rgba(255, 122, 107, 0.09);
+  color: var(--alerte);
+}
+
+.rangee {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.rangee .bouton {
+  flex: 1;
+  min-height: 42px;
+  font-size: 14px;
 }
 
 /* --- Reservations ------------------------------------------------------------ */

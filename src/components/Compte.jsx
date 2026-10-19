@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api, messageErreur } from '../lib/api.js'
+import { Reglages } from './Reglages.jsx'
 
 const heureLocale = (horodatage) =>
   new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(horodatage))
@@ -27,6 +28,8 @@ export function Compte({ session, onDeconnexion }) {
 
   return (
     <>
+      {admin && <Reglages />}
+
       {admin && (
         <div className="carte">
           <div className="carte-titre">
