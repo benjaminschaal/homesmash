@@ -1,5 +1,7 @@
 # 🏸 HomeSmash
 
+**En service : [homesmash.vercel.app](https://homesmash.vercel.app)** — accès par code personnel.
+
 Les créneaux de badminton du Bad's Club, sur le téléphone : voir les terrains
 libres du midi, consulter ses réservations, et proposer un sondage au groupe
 sur Google Chat.
@@ -93,8 +95,8 @@ gardien. Personne ne le voit, personne ne repart avec.
 4. **Déployer**, puis vérifier :
 
    ```bash
-   curl -s -o /dev/null -w "%{http_code}\n" https://<ton-app>.vercel.app/api/session   # 401 attendu
-   curl -sI https://<ton-app>.vercel.app/ | grep -i strict-transport                    # HSTS présent
+   curl -s -o /dev/null -w "%{http_code}\n" https://homesmash.vercel.app/api/session   # 401 attendu
+   curl -sI https://homesmash.vercel.app/ | grep -i strict-transport                    # HSTS présent
    ```
 
    `401` sans cookie signifie que la porte est bien fermée. `503` veut dire
